@@ -12,31 +12,24 @@ module comparator
 (
 	input wire [15:0] a,
 	input wire [15:0] b,
-	output wire gt,
-	output wire lt,
-	output wire eq
+	output logic gt,
+	output logic lt,
+	output logic eq
 );
 
-	wire gte;
-	wire lte;
-
 	always @ (a, b) begin: COM
-		if (not (a > b))
-			lte <= 1'b1;
-		if (!(b > a)
-			assign gte = 1'b1;
-		
-		if (not (lte == 1'b1))
-			GT = 1'b1;
-			LT == 1'b0;
-			EQ = 1'b0;
-		else if (not (gte == 1))
-			GT = 1'b0;
-			LT = 1'b1;
-			EQ = 1'b0;
-		else
-			GT = 1'b0;
-			LT = 1'b0;
-			EQ = 1'b1;
+		if (a > b) begin
+			gt <= 1'b1;
+			lt <= 1'b0;
+			eq <= 1'b0;
+		end else if (a < b) begin
+			gt <= 1'b0;
+			lt <= 1'b1;
+			eq <= 1'b0;
+		end else begin
+			gt <= 1'b0;
+			lt <= 1'b0;
+			eq <= 1'b1;
+		end
 	end
 endmodule;
