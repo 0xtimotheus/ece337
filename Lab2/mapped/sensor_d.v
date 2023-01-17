@@ -1,11 +1,11 @@
 /////////////////////////////////////////////////////////////
 // Created by: Synopsys DC Expert(TM) in wire load mode
 // Version   : K-2015.06-SP1
-// Date      : Tue Jan 17 13:03:01 2023
+// Date      : Tue Jan 17 13:17:03 2023
 /////////////////////////////////////////////////////////////
 
 
-module sensor_s ( sensors, error );
+module sensor_d ( sensors, error );
   input [3:0] sensors;
   output error;
   wire   n3, n4;

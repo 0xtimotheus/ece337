@@ -1,12 +1,12 @@
 
 module sensor_s (input logic [3:0] sensors, output logic error);
 
-wire w1;
-wire w2;
-wire w3;
-AND2X1 A1 (sensors[1], sensors[2], w1);
-AND2X1 A2 (sensors[1], sensors[3], w1);
-OR2X1  O1 (w1, w2, w3);
-OR2x1  O2 (sensors[0], w3, error);
+logic w1;
+logic w2;
+logic w3;
+AND2X1 A1 (.A(sensors[1]), .B(sensors[2]), .Y(w1));
+AND2X1 A2 (.A(sensors[1]), .B(sensors[3]), .Y(w2));
+OR2X1  O1 (.A(w1), .B(w2), .Y(w3));
+OR2X1  O2 (.A(sensors[0]), .B(w3), .Y(error));
 
 endmodule
