@@ -3,10 +3,10 @@
 
 `timescale 1ns / 100ps
 
-module tb_adder_4bit
+module tb_adder_8bit
 ();
 	// Define local parameters used by the test bench
-	localparam NUM_INPUT_BITS			= 4;
+	localparam NUM_INPUT_BITS			= 8;
 	localparam NUM_OUTPUT_BITS		= NUM_INPUT_BITS + 1;
 	localparam MAX_OUTPUT_BIT			= NUM_OUTPUT_BITS - 1;
 	localparam NUM_TEST_BITS 			= (NUM_INPUT_BITS * 2) + 1;
@@ -21,24 +21,24 @@ module tb_adder_4bit
 	localparam TEST_DELAY					= 10;
 	
 	// Declare Design Under Test (DUT) portmap signals
-	wire	[3:0] tb_a;
-	wire	[3:0] tb_b;
+	wire	[7:0] tb_a;
+	wire	[7:0] tb_b;
 	wire	tb_carry_in;
-	wire	[3:0] tb_sum;
+	wire	[7:0] tb_sum;
 	wire	tb_carry_out;
 	
 	// Declare test bench signals
 	integer tb_test_case;
-	reg [8:0] tb_test_inputs;
-	reg [4:0] tb_expected_outputs;
+	reg [16:0] tb_test_inputs;
+	reg [8:0] tb_expected_outputs;
 	
 	// DUT port map
-	adder_4bit DUT(.a(tb_a), .b(tb_b), .carry_in(tb_carry_in), .sum(tb_sum), .overflow(tb_carry_out));
+	adder_8bit DUT(.a(tb_a), .b(tb_b), .carry_in(tb_carry_in), .sum(tb_sum), .overflow(tb_carry_out));
 	
 	// Connect individual test input bits to a vector for easier testing
-	assign tb_a					= tb_test_inputs[3:0];
-	assign tb_b					= tb_test_inputs[7:4];
-	assign tb_carry_in	= tb_test_inputs[8];
+	assign tb_a					= tb_test_inputs[7:0];
+	assign tb_b					= tb_test_inputs[15:8];
+	assign tb_carry_in	= tb_test_inputs[16];
 	
 	// Test bench process
 	initial
@@ -63,17 +63,17 @@ module tb_adder_4bit
 			#(TEST_DELAY - 1);
 			
 			// Check the DUT's Sum output value
-			if(tb_expected_outputs[3:0] == tb_sum)
+			if(tb_expected_outputs[7:0] == tb_sum)
 			begin
 				$info("Correct Sum value for test case %d!", tb_test_case);
 			end
 			else
 			begin
-				$error("Incorrect Sum value for test case %d: %d + %d + %d = %d vs !", tb_test_case, tb_a, tb_b, tb_carry_in, tb_sum, tb_expected_outputs[3:0]);
+				$error("Incorrect Sum value for test case %d: %d + %d + %d = %d vs !", tb_test_case, tb_a, tb_b, tb_carry_in, tb_sum, tb_expected_outputs[7:0]);
 			end
 			
 			// Check the DUT's Carry Out output value
-			if(tb_expected_outputs[4] == tb_carry_out)
+			if(tb_expected_outputs[8] == tb_carry_out)
 			begin
 				$info("Correct Carry Out value for test case %d!", tb_test_case);
 			end
