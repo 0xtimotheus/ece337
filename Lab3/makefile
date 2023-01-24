@@ -19,12 +19,12 @@ include /home/ecegrid/a/ece337/Course_Prod/course_make_vars
 #
 # **** list all files on the same line. DO NOT USE the "\" escape character to extend across 
 #      multiple lines. The grading script expects all file names on one line. 
-COMPONENT_FILES	:= 
+COMPONENT_FILES	:= adder_nbit.sv adder_1bit.sv
 
 # Specify the name of the top level file (do not include the source folder in the name)
 # NOTE: YOU WILL NEED TO SET THIS VARIABLE'S VALUE WHEN WORKING WITH HEIRARCHICAL DESIGNS
 # AND THE AUTOMATED GRADING SYSTEM
-TOP_LEVEL_FILE	:= 
+TOP_LEVEL_FILE	:= adder_16bit.sv
 
 # Specify the filepath of the test bench you want to use (ie. tb_top_level.sv)
 # (do not include the source folder in the name)
@@ -341,7 +341,7 @@ elaborate $(MOD_NAME) -lib WORK
 uniquify
 # Step 2: Set design constraints
 # Uncomment below to set timing, area, power, etc. constraints
-# set_max_delay <delay> -from "<input>" -to "<output>"
+# set_max_delay 6.13 -from "b[0]" -to "sum[15]"
 # set_max_area <area>
 # set_max_total_power <power> mW
 $(if $(and $(CLOCK_NAME), $(CLOCK_PERIOD)), create_clock "$(CLOCK_NAME)" -name "$(CLOCK_NAME)" -period $(CLOCK_PERIOD))
@@ -356,6 +356,22 @@ report_power -hier >> reports/$(MOD_NAME).rep
 
 # Step 5: Output final VHDL and Verilog files
 write_file -format verilog -hierarchy -output "mapped/$(MOD_NAME).v"
+
+# Step 2: Put constraints
+set_max_delay 6.13 -from "b[0]" -to "sum[15]"
+
+# Step 3: Compile design
+set_structure true -design $(MOD_NAME) -boolean true -boolean_effort medium
+compile -map_effort high
+
+# Step 4: Output reports
+report_timing -path full -delay max -max_paths 1 -nworst 1 > reports/$(MOD_NAME)_opt.rep
+report_area >> reports/$(MOD_NAME)_opt.rep
+report_power -hier >> reports/$(MOD_NAME)_opt.rep
+
+# Step 5: Output final Verilog
+write_file -format verilog -hierarchy -output "mapped/$(MOD_NAME)_opt.rep"
+
 echo "\nScript Done\n"
 echo "\nChecking Design\n"
 check_design
