@@ -1,7 +1,7 @@
-module mealy(logic input clk, logic input n_rst, logic input i, logic output o);
+module mealy(input logic clk, input logic n_rst, input logic i, output logic o);
 
-logic [2:0] state;
-logic [2:0] nstate;
+logic [1:0] state;
+logic [1:0] nstate;
 logic out;
 logic nout;
 
@@ -19,22 +19,22 @@ end
 
 always_comb begin
     case (state)
-        00: 
+        2'b00: begin
             nstate = i ? 2'b01 : 2'b00;
             nout = 0;
-            break; 
-        01: 
+        end
+        2'b01: begin 
             nstate = i ? 2'b10 : 2'b00;
-            nout = 0;
-            break;
-        10: 
+            nout = 0; 
+        end
+        2'b10: begin
             nstate = i ? 2'b10 : 2'b11; 
             nout = 0;
-            break;
-        11: 
+        end
+        2'b11: begin 
             nstate = i ? 2'b01 : 2'b00;
             nout = i ? 1 : 0;
-            break;
+        end
         default: nstate = 2'b00;
     endcase
 end
