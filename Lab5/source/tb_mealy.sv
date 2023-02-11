@@ -49,10 +49,10 @@ module tb_mealy();
         $info("⛵ Testing stream: %b", stream);
         for(integer i = 15; i >= 0; i--) begin 
             tb_i = stream[i];
-            #(CLK_PERIOD*1.0/2.0);
-            if(i <= 11) log((stream[i+4] && stream[i+3] && ~stream[i+2] && stream[i+1]) == tb_o, $sformatf("--stream index: %d ;;; last four bits: %b%b%b%b", i, stream[i+4], stream[i+3], stream[i+2], stream[i+1]));
-            else        log((i <= 11 && stream[i+4] && stream[i+3] && ~stream[i+2] && stream[i+1]) == tb_o, $sformatf("--stream index: %d", i));
-            #(CLK_PERIOD*1.0/2.0);
+            #(CLK_PERIOD*3.0/4.0);
+            if(i <= 12) log((stream[i+3] && stream[i+2] && ~stream[i+1] && stream[i]) == tb_o, $sformatf("--stream index: %d ;;; last four bits: %b%b%b%b", i, stream[i+3], stream[i+2], stream[i+1], stream[i]));
+            else        log((i <= 12 && stream[i+3] && stream[i+2] && ~stream[i+1] && stream[i]) == tb_o, $sformatf("--stream index: %d", i));
+            #(CLK_PERIOD*1.0/4.0);
         end
     end
     endtask
@@ -74,19 +74,21 @@ module tb_mealy();
         tb_n_rst = 1'b1;
         
         // Test: Correctly Id Empty Stream
-        //test_stream(16'b0);
+        /*
+        test_stream(16'b0);
 
         // Test: Correctly Id Discrete Correct stream
-        //test_stream(16'b0000001101000000);
+        test_stream(16'b0000001101000000);
 
         // Test: Correctly Id Discrete Repeated streams
-        //test_stream(16'b1101001101001101);
+        test_stream(16'b1101001101001101);
 
         // Test: Correctly Id Overlapping Streams
-        //test_stream(16'b1101101000011010);
+        test_stream(16'b1101101000011010);
 
         // Test: Correctly Break Streams
-        //test_stream(16'b101111001110110);
+        test_stream(16'b101111001110110);
+        */
 
         // Brute Force
         test_bits = 'b0;
@@ -94,7 +96,7 @@ module tb_mealy();
             test_bits = test_bits + 1;
             test_stream(test_bits);
         end
-
+        
         // Output Results
         $info("%s %d/%d tests passed", 0 == tests_failed ? ":)" : ":(", tests_total - tests_failed, tests_total);
         if(tests_total != tests_failed) $info("🛑 %d tests failed", tests_failed);

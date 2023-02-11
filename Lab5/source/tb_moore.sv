@@ -9,6 +9,8 @@ module tb_moore();
     logic tb_i;
     logic tb_o;
 
+    logic [15:0] test_bits;
+
     integer tests_total = 0;
     integer tests_failed = 0;
 
@@ -73,6 +75,7 @@ module tb_moore();
         #(CLK_PERIOD/2.0);
         tb_n_rst = 1'b1;
         
+        /*
         // Test: Correctly Id Empty Stream
         test_stream(16'b0);
 
@@ -87,6 +90,13 @@ module tb_moore();
 
         // Test: Correctly Break Streams
         test_stream(16'b101111001110110);
+        */
+
+        test_bits = 'b0;
+        for(integer i = 0; i < 4096; i++) begin
+            test_bits = test_bits + 1;
+            test_stream(test_bits);
+        end
 
         // Output Results
         $info("%s %d/%d tests passed", 0 == tests_failed ? ":)" : ":(", tests_total - tests_failed, tests_total);
