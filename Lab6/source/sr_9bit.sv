@@ -6,12 +6,11 @@ module sr_9bit(
     output logic [7:0] packet_data,
     output logic stop_bit
 );
-    assign stop_bit = packet_data[7];
-    flex_stp_sr #(.NUM_BITS(8)) sr (
+    flex_stp_sr #(.NUM_BITS(9), .SHIFT_MSB(0)) sr (
         .clk(clk), 
         .n_rst(n_rst), 
         .shift_enable(shift_strobe),
         .serial_in(serial_in),
-        .parallel_out(packet_data)
+        .parallel_out({stop_bit, packet_data})
     );
 endmodule

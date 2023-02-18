@@ -9,12 +9,12 @@ module rcu (
     output logic load_buffer,
     output logic enable_timer
 );
-    typedef enum {IDLE=1, START=2, DATA=3, STOP=4, ERROR=5, LOAD=6} statereg; 
+    typedef enum {IDLE=1, START=2, DATA=3, STOP=4, CHECK=5, ERROR=6, LOAD=7} statereg; 
     statereg state;
     statereg nstate;
 
-    assign enable_timer = state == START | state == DATA | state == STOP;
-    assign sbc_clear = state == ERROR;
+    assign enable_timer = state == DATA | state == STOP;
+    assign sbc_clear = state == START;
     assign sbc_enable = state == STOP;
     assign load_buffer = state == LOAD;
 
@@ -27,11 +27,13 @@ module rcu (
     end
 
     always_comb begin
+        nstate = IDLE;
         case(state)
             IDLE:         nstate = new_packet_detected ? START : IDLE;
             START:        nstate = DATA;
             DATA:         nstate = packet_done ? STOP : DATA;
-            STOP:         nstate = framing_error ? ERROR : LOAD;
+            STOP:         nstate = CHECK;
+            CHECK:        nstate = framing_error ? ERROR : LOAD;
             ERROR, LOAD:  nstate = IDLE;
         endcase
     end

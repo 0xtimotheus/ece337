@@ -34,6 +34,7 @@ module tb_rcv_block();
   // Overall test case number for reference
   integer tb_test_num;
   string  tb_test_case;
+  integer tb_tests_failed;
   // Test case 'inputs' used for test stimulus
   reg [7:0] tb_test_data;
   reg       tb_test_stop_bit;
@@ -111,37 +112,49 @@ module tb_rcv_block();
     // Don't need to syncrhonize relative to clock edge for this design's outputs since they should have been stable for quite a while given the 2 Data Period gap between the end of the packet and when this should be used to check the outputs
     
     // Data recieved should match the data sent
-    assert(tb_expected_rx_data == tb_rx_data)
-      $info("Test case %0d: Test data correctly received", tb_test_num);
-    else
-      $error("Test case %0d: Test data was not correctly received", tb_test_num);
+    if(~tb_expected_framing_error) begin
+      assert(tb_expected_rx_data == tb_rx_data)
+        $info("Test case %0d: Test data correctly received", tb_test_num);
+      else begin
+        tb_tests_failed = tb_tests_failed + 1;
+        $error("Test case %0d: Test data was not correctly received; expected: %b versus actual: %b", tb_test_num, tb_expected_rx_data, tb_rx_data);
+      end
+    end
       
     // If and only if a proper stop bit is sent ('1') there shouldn't be a framing error.
     assert(tb_expected_framing_error == tb_framing_error)
       $info("Test case %0d: DUT correctly shows no framing error", tb_test_num);
-    else
+    else begin
+      tb_tests_failed = tb_tests_failed + 1;
       $error("Test case %0d: DUT incorrectly shows a framing error", tb_test_num);
+    end
     
     // If and only if a proper stop bit is sent ('1') should there be 'data ready'
     assert(tb_expected_data_ready == tb_data_ready)
       $info("Test case %0d: DUT correctly asserted the data ready flag", tb_test_num);
-    else
+    else begin
+      tb_tests_failed = tb_tests_failed + 1;
       $error("Test case %0d: DUT did not correctly assert the data ready flag", tb_test_num);
+    end
       
     // Check for the proper overrun error state for this test case
     if(1'b0 == tb_expected_overrun)
     begin
       assert(1'b0 == tb_overrun_error)
         $info("Test case %0d: DUT correctly shows no overrun error", tb_test_num);
-      else
+      else begin
+        tb_tests_failed = tb_tests_failed + 1;
         $error("Test case %0d: DUT incorrectly shows an overrun error", tb_test_num);
+      end
     end
     else
     begin
       assert(1'b1 == tb_overrun_error)
         $info("Test case %0d: DUT correctly shows an overrun error", tb_test_num);
-      else
+      else begin
+        tb_tests_failed = tb_tests_failed + 1;
         $error("Test case %0d: DUT incorrectly shows no overrun error", tb_test_num);
+      end
     end
     
     // Handle the case of the test case asserting the data read signal
@@ -161,8 +174,10 @@ module tb_rcv_block();
       // Check to see if the data ready flag cleared
       assert(1'b0 == tb_data_ready)
         $info("Test case %0d: DUT correctly cleared the data ready flag", tb_test_num);
-      else
+      else begin
+        tb_tests_failed = tb_tests_failed + 1;
         $error("Test case %0d: DUT did not correctly clear the data ready flag", tb_test_num);
+      end
     end
   end
   endtask
@@ -179,6 +194,7 @@ module tb_rcv_block();
   initial
   begin : TEST_PROC
     // Initialize all test bench signals
+    tb_tests_failed           = 0;
     tb_test_num               = -1;
     tb_test_case              = "TB Init";
     tb_test_data              = '1;
@@ -295,7 +311,101 @@ module tb_rcv_block();
     check_outputs(tb_test_data_read);
   
     // Append additonal test cases here (such as overrun case)
+
+    // Test case 3: Normal packet, max faster data rate, bad stop bit
+    // Synchronize to falling edge of clock to prevent timing shifts from prior test case(s)
+    @(negedge tb_clk);
+    tb_test_num += 1;
+    tb_test_case = "Max Fast Data-Rate, Normal Packet";
     
+    // Setup packet info for debugging/verificaton signals
+    tb_test_data       = 8'b11100001;
+    tb_test_stop_bit   = 1'b0;
+    tb_test_bit_period = NORM_DATA_PERIOD;
+    tb_test_data_read  = 1'b1;
+    
+    // Define expected ouputs for this test case
+    // For a good packet RX Data value should match data sent
+    tb_expected_rx_data       = tb_test_data;
+    // Valid stop bit ('1') -> Valid data -> Active data ready output
+    tb_expected_data_ready    = tb_test_stop_bit; 
+    // Framing error if and only if bad stop_bit ('0') was sent
+    tb_expected_framing_error = ~tb_test_stop_bit;
+    // Not intentionally creating an overrun condition -> overrun should be 0
+    tb_expected_overrun       = 1'b0;
+    
+    // DUT Reset
+    reset_dut;
+    
+    // Send packet
+    send_packet(tb_test_data, tb_test_stop_bit, tb_test_bit_period);
+    
+    // Wait for 2 data periods to allow DUT to finish processing the packet
+    #(tb_test_bit_period * 2);
+    
+    // Check outputs
+    check_outputs(tb_test_data_read);
+
+    // Test case 4: Normal packet, max faster data rate, not read
+    // Synchronize to falling edge of clock to prevent timing shifts from prior test case(s)
+    @(negedge tb_clk);
+    tb_test_num += 1;
+    tb_test_case = "Max Fast Data-Rate, Normal Packet";
+    
+    // Setup packet info for debugging/verificaton signals
+    tb_test_data       = 8'b00011000;
+    tb_test_stop_bit   = 1'b1;
+    tb_test_bit_period = NORM_DATA_PERIOD;
+    tb_test_data_read  = 1'b0;
+    
+    // Define expected ouputs for this test case
+    // For a good packet RX Data value should match data sent
+    tb_expected_rx_data       = tb_test_data;
+    // Valid stop bit ('1') -> Valid data -> Active data ready output
+    tb_expected_data_ready    = tb_test_stop_bit; 
+    // Framing error if and only if bad stop_bit ('0') was sent
+    tb_expected_framing_error = ~tb_test_stop_bit;
+    // Not intentionally creating an overrun condition -> overrun should be 0
+    tb_expected_overrun       = 1'b0;
+    
+    // DUT Reset
+    reset_dut;
+    
+    // Send packet
+    send_packet(tb_test_data, tb_test_stop_bit, tb_test_bit_period);
+    
+    // Wait for 2 data periods to allow DUT to finish processing the packet
+    #(tb_test_bit_period * 2);
+    
+    // Check outputs
+    check_outputs(tb_test_data_read);
+
+    //
+    // Exhaustive
+    //
+
+    for(logic [10:0] ei = 0; ei < 1024; ei = ei + 1) begin
+      @(negedge tb_clk);
+      tb_test_num += 1;
+      tb_test_data       = ei[7:0];
+      tb_test_stop_bit   = ei[8];
+      tb_test_bit_period = NORM_DATA_PERIOD;
+      tb_test_data_read  = ei[9];
+
+      tb_expected_rx_data       = tb_test_data;
+      tb_expected_data_ready    = tb_test_stop_bit; 
+      tb_expected_framing_error = ~tb_test_stop_bit;
+      tb_expected_overrun       = 1'b0;
+
+      reset_dut;
+
+      send_packet(tb_test_data, tb_test_stop_bit, tb_test_bit_period);
+      #(tb_test_bit_period * 2);
+      check_outputs(tb_test_data_read);
+    end
+
+    // 
+    $info("Failed %d total tests", tb_tests_failed);
   end
 
 endmodule

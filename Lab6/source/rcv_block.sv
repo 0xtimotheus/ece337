@@ -27,10 +27,10 @@ module rcv_block(
     logic stop_bit;
 
     // Syncronizer
-    assign sync_in = syncing;
+    assign sync_in = syncing[1];
     always_ff @ (posedge clk, negedge n_rst) begin
-        if(~n_rst) syncing <= 2'b00;
-        else syncing <= {syncing[1], serial_in};
+        if(~n_rst) syncing <= 2'b11;
+        else syncing <= {syncing[0], serial_in};
     end
 
     // Buffer
