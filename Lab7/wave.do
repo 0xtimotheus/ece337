@@ -1,5 +1,6 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
+add wave -noupdate -color Wheat /tb_fir_filter/tb_clk
 add wave -noupdate -expand -group Input /tb_fir_filter/DUT/dr_sync
 add wave -noupdate -expand -group Input /tb_fir_filter/DUT/lc_sync
 add wave -noupdate -expand -group Datapath -color {Yellow Green} /tb_fir_filter/DUT/op
@@ -24,8 +25,8 @@ add wave -noupdate -expand -group Count -color Firebrick /tb_fir_filter/DUT/clea
 add wave -noupdate -expand -group Count -color Gray60 /tb_fir_filter/DUT/cnt_up
 add wave -noupdate -expand -group Count -color Turquoise /tb_fir_filter/DUT/one_k_samples
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {0 ps} 0}
-quietly wave cursor active 0
+WaveRestoreCursors {{Cursor 1} {95000 ps} 0}
+quietly wave cursor active 1
 configure wave -namecolwidth 331
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -40,5 +41,5 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {9999239 ps} {10000041 ps}
+WaveRestoreZoom {67618 ps} {318791 ps}
 run 10000ns

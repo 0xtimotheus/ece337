@@ -14,7 +14,7 @@ module controller(
     output logic err
 );
 
-typedef enum reg [3:0] { IDLE=0, ERROR=1, LOADC=2, LOADD=3, M=4, A=5, DONE=6 } state;
+typedef enum reg [3:0] { IDLE=0, EIDLE=1, LOADC=2, LOADD=3, M=4, A=5, DONE=6 } state;
 
 state s;
 state n;
@@ -51,68 +51,83 @@ always_comb begin
     src1    = 4'b0;
     src2    = 4'b0;
     dest    = 4'b0;
-    err     = s == ERROR;
+    err     = 0;
 
     n       = s;
     ni      = i;
     nd      = d;
     nj      = j;
 
-    if (overflow) begin
-        n = ERROR;
-    end else begin
-        case(s)
-            IDLE: begin
-                n      = dr ? LOADD : 
-                         lc ? LOADC : 
-                         IDLE;
-            end
-            LOADC: begin
-                n      = IDLE;
-                nj     = j + 1;
+    case(s)
+        IDLE: begin
+            n      = dr ? LOADD : 
+                        lc ? LOADC : 
+                        IDLE;
+        end
+        EIDLE: begin
+            n     = dr ? LOADD : 
+                        lc ? LOADC : 
+                        EIDLE;;
+            err   = 1;
+        end
+        LOADC: begin
+            n      = IDLE;
+            nj     = j + 1;
 
-                op     = 3'b011;
-                dest   = j + 5;
-            end
-            LOADD: begin
+            op     = 3'b011;
+            dest   = j + 5;
+        end
+        LOADD: begin
+            if(dr) begin
                 n      = M;
                 nd     = 0;
                 
                 cnt_up = 1'b1;
                 op     = 3'b010;
                 dest   = (i % 4) + 1;
+            end else begin
+                n      = EIDLE; 
             end
-            M: begin
-                n = A;
+        end
+        M: begin
+            //if(overflow) begin
+            //    n = EIDLE;
+            //end else begin
+                n = overflow ? EIDLE : A;
                 
                 op     = 3'b110;
                 src1   = ((i + d) % 4) + 1;
                 src2   = d + 5;
                 dest   = 4'hA;
-            end
-            A: begin
-                n      = &d ? DONE : M;
+            //end
+        end
+        A: begin
+            //if(overflow) begin
+            //    n = EIDLE;
+            //end else begin
+                n      = overflow ? EIDLE : &d ? DONE : M;
                 nd     = d + 1;
                 
                 op     = (d % 2) == 1 ? 3'b101 :  3'b100;
                 src1   = d == 0 ? 4'hF : 4'h9;
                 src2   = 4'hA;
                 dest   = 4'h9;
-            end
-            DONE: begin
-                n      = IDLE;
+            //end
+        end
+        DONE: begin
+            //if(overflow) begin
+            //    n = EIDLE;
+            //end else begin
+                n      = overflow ? EIDLE : IDLE;
                 ni     = i == 0 ? 2'b11 : i - 1;
                 nd     = 0;
 
                 op     = 3'b001;
                 src1   = 4'h9;
                 dest   = 4'h0;
-            end
-            ERROR: begin
-                n      = IDLE;
-            end
-        endcase
-    end
+            //end
+        end
+    endcase
 end
 
 endmodule
