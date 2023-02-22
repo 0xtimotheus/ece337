@@ -257,17 +257,27 @@ module tb_fir_filter();
 	initial
 	begin // TODO: Add more standard test cases here
 		// Populate the test vector array to use
-		tb_test_vectors = new[2];
+		tb_test_vectors = new[4];
 		// Test case 0
-		tb_test_vectors[0].coeffs		= {{COEFF_5}, {COEFF1}, {COEFF1}, {COEFF_5}};
+		tb_test_vectors[0].coeffs   = {{COEFF_5}, {COEFF1}, {COEFF1}, {COEFF_5}};
 		tb_test_vectors[0].samples	= {16'd100, 16'd100, 16'd100, 16'd100};
 		tb_test_vectors[0].results	= {16'd0, 16'd50, 16'd50 ,16'd50};
 		tb_test_vectors[0].errors		= {1'b0, 1'b0, 1'b0, 1'b0};
 		// Test case 1
-		tb_test_vectors[1].coeffs		= tb_test_vectors[0].coeffs;
+		tb_test_vectors[1].coeffs	= tb_test_vectors[0].coeffs;
 		tb_test_vectors[1].samples	= {16'd1000, 16'd1000, 16'd100, 16'd100};
 		tb_test_vectors[1].results	= {16'd450, 16'd500, 16'd50 ,16'd50};
-		tb_test_vectors[1].errors		= {1'b0, 1'b0, 1'b0, 1'b0};
+		tb_test_vectors[1].errors   = {1'b0, 1'b0, 1'b0, 1'b0};
+		// Test case 2
+		tb_test_vectors[2].coeffs	= {{COEFF1}, {COEFF1}, {COEFF1}, {COEFF1}};
+		tb_test_vectors[2].samples	= {16'h000f, 16'hffff, 16'h00ff, 16'hffff};
+		tb_test_vectors[2].results	= {16'h0000, 16'h0000, 16'hff00 ,16'hffff};
+		tb_test_vectors[2].errors   = {1'b1, 1'b1, 1'b0, 1'b0};
+		// Test case 3
+		tb_test_vectors[3].coeffs	= {{COEFF1}, {COEFF1}, {COEFF1}, {COEFF1}};
+		tb_test_vectors[3].samples	= {16'hffff, 16'h000f, 16'hffff, 16'h000f};
+		tb_test_vectors[3].results	= {16'h0000, 16'hfffe1, 16'hfff0 ,16'h000f};
+		tb_test_vectors[3].errors   = {1'b1, 1'b0, 1'b0, 1'b0};
 	end
 	
 	// Test bench process
@@ -289,6 +299,7 @@ module tb_fir_filter();
 		reset_dut;
 		
 		// Standard 4 sample test cases
+		//for(tb_std_test_case = 0; tb_std_test_case < 2; tb_std_test_case++)
 		for(tb_std_test_case = 0; tb_std_test_case < tb_test_vectors.size(); tb_std_test_case++)
 		begin
 			test_stream(tb_test_vectors[tb_std_test_case]);

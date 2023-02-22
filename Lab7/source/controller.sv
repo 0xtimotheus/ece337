@@ -46,7 +46,7 @@ always_comb begin
     // defaults
     cnt_up  = 1'b0;
     clear   = 1'b0;
-    modwait = s != IDLE;
+    modwait = s != IDLE && s != EIDLE;
     op      = 2'b0;
     src1    = 4'b0;
     src2    = 4'b0;
@@ -76,11 +76,13 @@ always_comb begin
 
             op     = 3'b011;
             dest   = j + 5;
+            clear  = 1'b1;
         end
         LOADD: begin
             if(dr) begin
                 n      = M;
                 nd     = 0;
+                ni     = i == 0 ? 2'b11 : i - 1;
                 
                 cnt_up = 1'b1;
                 op     = 3'b010;
@@ -90,21 +92,14 @@ always_comb begin
             end
         end
         M: begin
-            //if(overflow) begin
-            //    n = EIDLE;
-            //end else begin
                 n = overflow ? EIDLE : A;
                 
                 op     = 3'b110;
-                src1   = ((i + d) % 4) + 1;
+                src1   = ((i + 1 + d) % 4) + 1;
                 src2   = d + 5;
                 dest   = 4'hA;
-            //end
         end
         A: begin
-            //if(overflow) begin
-            //    n = EIDLE;
-            //end else begin
                 n      = overflow ? EIDLE : &d ? DONE : M;
                 nd     = d + 1;
                 
@@ -112,20 +107,14 @@ always_comb begin
                 src1   = d == 0 ? 4'hF : 4'h9;
                 src2   = 4'hA;
                 dest   = 4'h9;
-            //end
         end
         DONE: begin
-            //if(overflow) begin
-            //    n = EIDLE;
-            //end else begin
                 n      = overflow ? EIDLE : IDLE;
-                ni     = i == 0 ? 2'b11 : i - 1;
                 nd     = 0;
 
                 op     = 3'b001;
                 src1   = 4'h9;
                 dest   = 4'h0;
-            //end
         end
     endcase
 end
