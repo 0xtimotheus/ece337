@@ -276,7 +276,7 @@ module tb_fir_filter();
 		// Test case 3
 		tb_test_vectors[3].coeffs	= {{COEFF1}, {COEFF1}, {COEFF1}, {COEFF1}};
 		tb_test_vectors[3].samples	= {16'hffff, 16'h000f, 16'hffff, 16'h000f};
-		tb_test_vectors[3].results	= {16'h0000, 16'hfffe1, 16'hfff0 ,16'h000f};
+		tb_test_vectors[3].results	= {16'h0000, 16'hffe1, 16'hfff0 ,16'h000f};
 		tb_test_vectors[3].errors   = {1'b1, 1'b0, 1'b0, 1'b0};
 	end
 	
