@@ -50,6 +50,7 @@ integer  tb_current_transaction_num;
 logic    tb_model_reset;
 string   tb_test_case;
 integer  tb_test_case_num;
+integer  tb_tests_failed;
 logic [DATA_MAX_BIT:0] tb_test_data;
 string                 tb_check_tag;
 logic [13:0]           tb_test_bit_period;
@@ -188,6 +189,7 @@ begin
   else begin // Check failed
     tb_mismatch = 1'b1;
     $error("Incorrect 'data_read' output %s during %s test case", check_tag, tb_test_case);
+    tb_tests_failed = tb_tests_failed + 1;
   end
 
   if(tb_expected_bit_period == tb_bit_period) begin // Check passed
@@ -196,6 +198,7 @@ begin
   else begin // Check failed
     tb_mismatch = 1'b1;
     $error("Incorrect 'bit_period' output %s during %s test case", check_tag, tb_test_case);
+    tb_tests_failed = tb_tests_failed + 1;
   end
 
   if(tb_expected_data_size == tb_data_size) begin // Check passed
@@ -204,6 +207,7 @@ begin
   else begin // Check failed
     tb_mismatch = 1'b1;
     $error("Incorrect 'data_size' output %s during %s test case", check_tag, tb_test_case);
+    tb_tests_failed = tb_tests_failed + 1;
   end
 
   // Wait some small amount of time so check pulse timing is visible on waves
@@ -280,6 +284,7 @@ initial begin
   // Initialize Test Case Navigation Signals
   tb_test_case       = "Initilization";
   tb_test_case_num   = -1;
+  tb_tests_failed    = 0;
   tb_test_data       = '0;
   tb_check_tag       = "N/A";
   tb_test_bit_period = '0;
@@ -396,6 +401,8 @@ initial begin
   // Update Navigation Info
   tb_test_case     = "Need More Tests!";
   tb_test_case_num = tb_test_case_num + 1;
+
+  $info("Failed: %d tests", tb_tests_failed);
 
 end
 

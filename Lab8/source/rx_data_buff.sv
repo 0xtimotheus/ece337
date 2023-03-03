@@ -29,7 +29,7 @@ module rx_data_buff
   begin : REG_LOGIC
     if(1'b0 == n_rst)
     begin
-      rx_data       <= '1;  // Initialize the rx_data buffer to have all bits be the idle line value
+      rx_data       <= '1;          // Initialize the rx_data buffer to have all bits be the idle line value
       data_ready    <= 1'b0;        // Initialize the data_ready flag to be inactive
       overrun_error <= 1'b0;        // Initialize the overrun_error flag to be inactive
     end
