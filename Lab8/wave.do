@@ -15,10 +15,13 @@ add wave -noupdate -color {Dark Green} /tb_apb_uart_rx/APB/data_read
 add wave -noupdate -color {Dark Green} /tb_apb_uart_rx/APB/overrun_error
 add wave -noupdate -color {Dark Green} /tb_apb_uart_rx/APB/framing_error
 add wave -noupdate -expand -group Input /tb_apb_uart_rx/APB/serial_in
+add wave -noupdate -color Tan /tb_apb_uart_rx/APB/rcv/strobe
+add wave -noupdate -color Tan /tb_apb_uart_rx/APB/rcv/rc/state
+add wave -noupdate -color Tan /tb_apb_uart_rx/APB/rcv/rc/packet_done
 add wave -noupdate -expand -group Output -color Gold /tb_apb_uart_rx/tb_prdata
 add wave -noupdate -expand -group Output -color Gold /tb_apb_uart_rx/tb_pslverr
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {145601 ps} 0}
+WaveRestoreCursors {{Cursor 1} {654655 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 281
 configure wave -valuecolwidth 100
@@ -34,5 +37,5 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-run 1000ns
-WaveRestoreZoom {0 ps} {134942 ps}
+run 10000ns
+WaveRestoreZoom {130718 ps} {1054688 ps}

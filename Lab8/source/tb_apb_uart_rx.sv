@@ -18,6 +18,9 @@ localparam ADDR_BIT_CR1  = ADDR_BIT_CR0 + 1;
 localparam ADDR_DATA_CR  = 3'd4;
 localparam ADDR_RX_DATA  = 3'd6;
 
+localparam TEST_BIT_PERIOD = 14'hA;
+localparam TEST_DATA_SIZE  = 8'h8;
+
 localparam RESET_BIT_PERIOD = '0;
 localparam RESET_DATA_SIZE  = '0;
 
@@ -39,7 +42,6 @@ integer  tb_test_case_num;
 integer  tb_tests_failed;
 logic [DATA_MAX_BIT:0] tb_test_data;
 string                 tb_check_tag;
-logic [13:0]           tb_test_bit_period;
 logic                  tb_mismatch;
 logic                  tb_check;
 
@@ -56,6 +58,7 @@ logic                          tb_pwrite;
 logic [((DATA_WIDTH*8) - 1):0] tb_pwdata;
 logic [((DATA_WIDTH*8) - 1):0] tb_prdata;
 logic                          tb_pslverr;
+logic                          tb_data_ready;
 
 // ------------------------------------
 // DUTs
@@ -122,7 +125,6 @@ endtask
 task send_packet;
     input  [7:0] data;
     input  stop_bit;
-    input  time data_period;
 
     integer i;
 begin
@@ -130,19 +132,31 @@ begin
     @(negedge tb_clk)
 
     // Send start bit
+    enqueue_transaction(1'b1, 1'b0, 3'b000, 8'h0, 1'b0);
+    execute_transactions(1);
     tb_serial_in = 1'b0;
-    #data_period;
+    #(TEST_BIT_PERIOD * CLK_PERIOD);
 
     // Send data bits
-    for(i = 0; i < 8; i = i + 1)
+    for(i = 0; i < TEST_DATA_SIZE; i = i + 1)
     begin
         tb_serial_in = data[i];
-        #data_period;
+        #((TEST_BIT_PERIOD - 2) * CLK_PERIOD);
+        enqueue_transaction(1'b1, 1'b0, 3'b000, 8'b0, 1'b0);
+        execute_transactions(1);
+        check(8'b0, tb_prdata, "sending packet-- data ready");
+
     end
 
     // Send stop bit
     tb_serial_in = stop_bit;
-    #data_period;
+    #(TEST_BIT_PERIOD * CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, 3'b000, 8'b0, 1'b0);
+    enqueue_transaction(1'b1, 1'b0, 3'b110, data, 1'b0);
+    execute_transactions(1);
+    check(8'b1, tb_prdata, "finished packet-- data ready");
+    execute_transactions(1);
+    check(data, tb_prdata, "finished packet-- packet data");
 end
 endtask
 
@@ -187,7 +201,7 @@ task execute_transactions;
 begin
   // Activate the bus model
   tb_enable_transactions = 1'b1;
-  @(posedge tb_clk);
+  //@(posedge tb_clk);
 
   // Process the transactions
   for(wait_var = 0; wait_var < num_transactions; wait_var++) begin
@@ -202,8 +216,8 @@ end
 endtask
 
 task check;
-    input expected;
-    input actual;
+    input integer expected;
+    input integer actual;
     input string message;
 begin
     if(expected == actual) begin
@@ -233,9 +247,7 @@ end
 initial begin
 
     tests_failed = 0;
-
-    tb_n_rst = 1'b1;
-    tb_serial_in = 1'b0;
+    tb_serial_in    = 1'b1;
 
     tb_model_reset = 1'b0;
     tb_enable_transactions  = 1'b0;
@@ -258,20 +270,78 @@ initial begin
     enqueue_transaction(1'b1, 1'b0, 3'b010, 8'b0, 1'b0);
     enqueue_transaction(1'b1, 1'b0, 3'b011, 8'b0, 1'b0);
     enqueue_transaction(1'b1, 1'b0, 3'b100, 8'b0, 1'b0);
-    enqueue_transaction(1'b1, 1'b0, 3'b110, 8'b0, 1'b0);
+    enqueue_transaction(1'b1, 1'b0, 3'b110, 8'hff, 1'b0);
     
     execute_transactions(1);
     check(8'b0, tb_prdata, "power on reset- data_ready");
+    
     execute_transactions(1);
     check(8'b0, tb_prdata, "power on reset- error_status");
+    
     execute_transactions(1);
     check(8'b0, tb_prdata, "power on reset- bit period lower half");
+    
     execute_transactions(1);
     check(8'b0, tb_prdata, "power on reset- bit period upper half");
+    
     execute_transactions(1);
     check(8'b0, tb_prdata, "power on reset- data size");
+    
     execute_transactions(1);
-    check(8'b0, tb_prdata, "power on reset- data buffer");
+    check(8'hff, tb_prdata, "power on reset- data buffer");
+
+    #(2*CLK_PERIOD);
+
+    // Load Bit Period
+    enqueue_transaction(1'b1, 1'b1, 3'b010, TEST_BIT_PERIOD[7:0], 1'b0);
+    enqueue_transaction(1'b1, 1'b1, 3'b011, { 2'b0, TEST_BIT_PERIOD[13:8] }, 1'b0);
+    enqueue_transaction(1'b1, 1'b0, 3'b010, TEST_BIT_PERIOD[7:0], 1'b0);
+    enqueue_transaction(1'b1, 1'b0, 3'b011, { 2'b0, TEST_BIT_PERIOD[13:8] }, 1'b0);
+
+    execute_transactions(2);
+
+    execute_transactions(1);
+    check(TEST_BIT_PERIOD[7:0], tb_prdata, "load config- bit period lower half");
+    execute_transactions(1);
+    check(TEST_BIT_PERIOD[13:8], tb_prdata, "load config- bit period upper half");
+
+    #(2*CLK_PERIOD);
+
+    // Load Data Size
+    enqueue_transaction(1'b1, 1'b1, 3'b100, TEST_DATA_SIZE, 1'b0);
+    enqueue_transaction(1'b1, 1'b0, 3'b100, TEST_DATA_SIZE, 1'b0);
+
+    execute_transactions(1);
+
+    execute_transactions(1);
+    check(TEST_DATA_SIZE, tb_prdata, "load config- data size");
+
+    #(2*CLK_PERIOD);
+
+    // Trigger pslverr
+    enqueue_transaction(1'b1, 1'b1, 3'b000, 8'h0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, 3'b001, 8'h0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, 3'b110, 8'h0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, 3'b111, 8'h0, 1'b1);
+
+    execute_transactions(1);
+    check(1'b1, tb_pslverr, "pslverr triggered- write to data_status");
+    execute_transactions(1);
+    check(1'b1, tb_pslverr, "pslverr triggered- write to error_status");
+    execute_transactions(1);
+    check(1'b1, tb_pslverr, "pslverr triggered- write to data_buf");
+    execute_transactions(1);
+    check(1'b1, tb_pslverr, "pslverr triggered- write to unused addr");
+
+    #(2*CLK_PERIOD);
+
+    // Writing Data
+    send_packet(8'b01100110, 1'b1);
+    send_packet(8'b10011001, 1'b1);
+    send_packet(8'b10101010, 1'b1);
+    send_packet(8'b01010101, 1'b1);
+
+    $info("Failed: %d tests", tests_failed);
 
 end
 

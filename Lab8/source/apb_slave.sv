@@ -86,7 +86,7 @@ always_comb begin
                 else prdata = bit_period_reg[15:8];
             end
             3'b100: begin
-                if(pwrite) ndata_size = pwdata[3:0];
+                if(pwrite) ndata_size = {4'b0, pwdata[3:0]};
                 else prdata = {4'b0, data_size_reg};
             end
             3'b110: begin

@@ -1,7 +1,7 @@
 /////////////////////////////////////////////////////////////
 // Created by: Synopsys DC Expert(TM) in wire load mode
 // Version   : K-2015.06-SP1
-// Date      : Fri Mar  3 16:34:33 2023
+// Date      : Mon Mar  6 22:52:02 2023
 /////////////////////////////////////////////////////////////
 
 
@@ -320,8 +320,7 @@ module flex_counter_NUM_CNT_BITS4 ( clk, n_rst, clear, count_enable,
   input clk, n_rst, clear, count_enable;
   output rollover_flag;
   wire   n33, n34, n35, n36, n37, n1, n2, n3, n9, n10, n11, n12, n13, n14, n15,
-         n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29,
-         n30;
+         n16, n17, n18, n19, n20, n21, n22, n23, n24, n25, n26, n27, n28, n29;
 
   DFFSR \count_out_reg[0]  ( .D(n37), .CLK(clk), .R(n_rst), .S(1'b1), .Q(
         count_out[0]) );
@@ -333,36 +332,35 @@ module flex_counter_NUM_CNT_BITS4 ( clk, n_rst, clear, count_enable,
         rollover_flag) );
   DFFSR \count_out_reg[3]  ( .D(n34), .CLK(clk), .R(n_rst), .S(1'b1), .Q(
         count_out[3]) );
-  INVX2 U8 ( .A(n18), .Y(n1) );
-  OAI22X1 U9 ( .A(n2), .B(n3), .C(n9), .D(n10), .Y(n37) );
-  OAI22X1 U10 ( .A(n3), .B(n11), .C(n10), .D(n12), .Y(n36) );
-  OAI22X1 U11 ( .A(n3), .B(n13), .C(n14), .D(n10), .Y(n35) );
-  OAI22X1 U12 ( .A(n3), .B(n15), .C(n16), .D(n10), .Y(n34) );
-  INVX1 U13 ( .A(n17), .Y(n10) );
-  INVX1 U14 ( .A(count_out[3]), .Y(n15) );
-  OAI22X1 U15 ( .A(n3), .B(n18), .C(n19), .D(n20), .Y(n33) );
-  NAND2X1 U16 ( .A(n21), .B(n22), .Y(n20) );
-  XOR2X1 U17 ( .A(n16), .B(rollover_val[3]), .Y(n22) );
-  XOR2X1 U18 ( .A(n23), .B(n24), .Y(n16) );
-  NOR2X1 U19 ( .A(n13), .B(n25), .Y(n24) );
-  NAND2X1 U20 ( .A(count_out[3]), .B(n18), .Y(n23) );
-  XOR2X1 U21 ( .A(n14), .B(rollover_val[2]), .Y(n21) );
-  XOR2X1 U22 ( .A(n25), .B(n26), .Y(n14) );
-  NOR2X1 U23 ( .A(rollover_flag), .B(n13), .Y(n26) );
-  INVX1 U24 ( .A(count_out[2]), .Y(n13) );
-  NAND3X1 U25 ( .A(n17), .B(n27), .C(n28), .Y(n19) );
-  XOR2X1 U26 ( .A(n12), .B(rollover_val[1]), .Y(n28) );
-  OAI21X1 U27 ( .A(n9), .B(n29), .C(n25), .Y(n12) );
-  NAND2X1 U28 ( .A(n9), .B(n29), .Y(n25) );
-  NOR2X1 U29 ( .A(n11), .B(n1), .Y(n29) );
-  INVX1 U30 ( .A(count_out[1]), .Y(n11) );
-  XOR2X1 U31 ( .A(rollover_val[0]), .B(n9), .Y(n27) );
-  NOR2X1 U32 ( .A(n2), .B(rollover_flag), .Y(n9) );
-  INVX1 U33 ( .A(count_out[0]), .Y(n2) );
-  NOR2X1 U34 ( .A(n30), .B(clear), .Y(n17) );
-  INVX1 U35 ( .A(rollover_flag), .Y(n18) );
-  INVX1 U36 ( .A(n30), .Y(n3) );
-  NOR2X1 U37 ( .A(count_enable), .B(clear), .Y(n30) );
+  OAI22X1 U8 ( .A(n1), .B(n2), .C(n3), .D(n9), .Y(n37) );
+  OAI22X1 U9 ( .A(n2), .B(n10), .C(n9), .D(n11), .Y(n36) );
+  OAI22X1 U10 ( .A(n2), .B(n12), .C(n13), .D(n9), .Y(n35) );
+  OAI22X1 U11 ( .A(n2), .B(n14), .C(n15), .D(n9), .Y(n34) );
+  INVX1 U12 ( .A(n16), .Y(n9) );
+  INVX1 U13 ( .A(count_out[3]), .Y(n14) );
+  OAI22X1 U14 ( .A(n2), .B(n17), .C(n18), .D(n19), .Y(n33) );
+  NAND2X1 U15 ( .A(n20), .B(n21), .Y(n19) );
+  XOR2X1 U16 ( .A(n15), .B(rollover_val[3]), .Y(n21) );
+  XOR2X1 U17 ( .A(n22), .B(n23), .Y(n15) );
+  NOR2X1 U18 ( .A(n12), .B(n24), .Y(n23) );
+  NAND2X1 U19 ( .A(count_out[3]), .B(n17), .Y(n22) );
+  XOR2X1 U20 ( .A(n13), .B(rollover_val[2]), .Y(n20) );
+  XOR2X1 U21 ( .A(n24), .B(n25), .Y(n13) );
+  NOR2X1 U22 ( .A(rollover_flag), .B(n12), .Y(n25) );
+  INVX1 U23 ( .A(count_out[2]), .Y(n12) );
+  NAND3X1 U24 ( .A(n16), .B(n26), .C(n27), .Y(n18) );
+  XOR2X1 U25 ( .A(n11), .B(rollover_val[1]), .Y(n27) );
+  OAI21X1 U26 ( .A(n3), .B(n28), .C(n24), .Y(n11) );
+  NAND2X1 U27 ( .A(n3), .B(n28), .Y(n24) );
+  NOR2X1 U28 ( .A(n10), .B(rollover_flag), .Y(n28) );
+  INVX1 U29 ( .A(count_out[1]), .Y(n10) );
+  XOR2X1 U30 ( .A(rollover_val[0]), .B(n3), .Y(n26) );
+  NOR2X1 U31 ( .A(n1), .B(rollover_flag), .Y(n3) );
+  INVX1 U32 ( .A(count_out[0]), .Y(n1) );
+  NOR2X1 U33 ( .A(n29), .B(clear), .Y(n16) );
+  INVX1 U34 ( .A(rollover_flag), .Y(n17) );
+  INVX1 U35 ( .A(n29), .Y(n2) );
+  NOR2X1 U36 ( .A(count_enable), .B(clear), .Y(n29) );
 endmodule
 
 
@@ -376,10 +374,10 @@ module timer ( clk, n_rst, enable_timer, bit_period, data_size, shift_strobe,
 
   flex_counter_NUM_CNT_BITS14 fc0 ( .clk(clk), .n_rst(n_rst), .clear(1'b0), 
         .count_enable(enable_timer), .rollover_val(bit_period), 
-        .rollover_flag(packet_done) );
+        .rollover_flag(shift_strobe) );
   flex_counter_NUM_CNT_BITS4 fc1 ( .clk(clk), .n_rst(n_rst), .clear(1'b0), 
-        .count_enable(enable_timer), .rollover_val(data_size), .rollover_flag(
-        shift_strobe) );
+        .count_enable(shift_strobe), .rollover_val(data_size), .rollover_flag(
+        packet_done) );
 endmodule
 
 
