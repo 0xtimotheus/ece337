@@ -19,7 +19,7 @@ localparam ADDR_DATA_CR  = 3'd4;
 localparam ADDR_RX_DATA  = 3'd6;
 
 localparam TEST_BIT_PERIOD = 14'hA;
-localparam TEST_DATA_SIZE  = 8'h8;
+localparam TEST_DATA_SIZE  = 8'h5;
 
 localparam RESET_BIT_PERIOD = '0;
 localparam RESET_DATA_SIZE  = '0;
@@ -151,12 +151,17 @@ begin
     // Send stop bit
     tb_serial_in = stop_bit;
     #(TEST_BIT_PERIOD * CLK_PERIOD);
-    enqueue_transaction(1'b1, 1'b0, 3'b000, 8'b0, 1'b0);
-    enqueue_transaction(1'b1, 1'b0, 3'b110, data, 1'b0);
+    enqueue_transaction(1'b1, 1'b0, 3'b000, {7'b0, stop_bit}, 1'b0);
+    enqueue_transaction(1'b1, 1'b0, 3'b001, {7'b0, ~stop_bit}, 1'b0);
+    if (stop_bit) enqueue_transaction(1'b1, 1'b0, 3'b110, data, 1'b0);
     execute_transactions(1);
-    check(8'b1, tb_prdata, "finished packet-- data ready");
+    check({7'b0, stop_bit}, tb_prdata, "finished packet-- data ready");
     execute_transactions(1);
-    check(data, tb_prdata, "finished packet-- packet data");
+    check({7'b0, ~stop_bit}, tb_prdata, "finished packet-- error status");
+    if(stop_bit) begin
+      execute_transactions(1);
+      check(data, tb_prdata, "finished packet-- packet data");
+    end
 end
 endtask
 
@@ -336,10 +341,23 @@ initial begin
     #(2*CLK_PERIOD);
 
     // Writing Data
-    send_packet(8'b01100110, 1'b1);
-    send_packet(8'b10011001, 1'b1);
-    send_packet(8'b10101010, 1'b1);
-    send_packet(8'b01010101, 1'b1);
+    send_packet(8'b00000110, 1'b1);
+    send_packet(8'b00010011, 1'b1);
+    send_packet(8'b00010101, 1'b1);
+    send_packet(8'b00001010, 1'b1);
+    send_packet(8'b00001010, 1'b0);
+
+    tb_serial_in = 1'b1;
+    #CLK_PERIOD;
+    #CLK_PERIOD;
+
+    send_packet(8'b00000000, 1'b0);
+
+    tb_serial_in = 1'b1;
+    #CLK_PERIOD;
+    #CLK_PERIOD;
+
+    send_packet(8'b00001010, 1'b1);
 
     $info("Failed: %d tests", tests_failed);
 

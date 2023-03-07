@@ -11,6 +11,7 @@ add wave -noupdate -expand -group {Config State} -color {Olive Drab} /tb_apb_uar
 add wave -noupdate -expand -group {Config State} -color {Olive Drab} /tb_apb_uart_rx/APB/bit_period
 add wave -noupdate -expand -group {Config State} -color {Olive Drab} /tb_apb_uart_rx/APB/apb/data_buf
 add wave -noupdate -expand -group {Config State} -color {Olive Drab} /tb_apb_uart_rx/APB/data_ready
+add wave -noupdate -expand -group {Config State} -color {Olive Drab} /tb_apb_uart_rx/APB/apb/error_status
 add wave -noupdate -color {Dark Green} /tb_apb_uart_rx/APB/data_read
 add wave -noupdate -color {Dark Green} /tb_apb_uart_rx/APB/overrun_error
 add wave -noupdate -color {Dark Green} /tb_apb_uart_rx/APB/framing_error

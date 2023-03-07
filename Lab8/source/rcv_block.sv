@@ -67,7 +67,8 @@ module rcv_block(
         .shift_strobe(strobe),
         .serial_in(sync_in),
         .packet_data(packet_data),
-        .stop_bit(stop_bit)
+        .stop_bit(stop_bit),
+        .data_size(data_size)
     );
 
     // Timer
