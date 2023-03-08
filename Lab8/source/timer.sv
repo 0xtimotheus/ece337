@@ -20,7 +20,7 @@ module timer (
     );
 
     //assign shift_strobe = strobe[2] & ~strobe[1] & strobe[0];
-    flex_counter #(.NUM_CNT_BITS(4)) fc1 (
+    flex_counter #(.NUM_CNT_BITS(5)) fc1 (
         .clk(clk),
         .n_rst(n_rst),
         .clear(~enable_timer),
