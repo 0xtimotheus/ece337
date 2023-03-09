@@ -1,4 +1,4 @@
-module fir_filter(
+module fir_filter (
     input logic clk,
     input logic n_reset,
     input logic [15:0] sample_data,
