@@ -21,7 +21,16 @@ module ahb_lite_slave (
     output logic hresp
 );
 
-typedef enum logic [3:0] { STATUS=4'h0, RESULT=4'h2, SAMPLE=4'h4, F0COEF=4'h6, F1COEF=4'h8, F2COEF=4'hA, F3COEF=4'hC, COEFFCONF=4'hE } store_addr;
+typedef enum logic [3:0] { 
+    STATUS=4'h0, 
+    RESULT=4'h2, 
+    SAMPLE=4'h4, 
+    F0COEF=4'h6, 
+    F1COEF=4'h8, 
+    F2COEF=4'hA, 
+    F3COEF=4'hC, 
+    COCONF=4'hE 
+} store_addr;
 typedef enum logic [1:0] { IDLE=2'b00, DELAY=2'b01, NONSEQ=2'b10, SEQ=2'b11 } transfer;
 
 reg [15:0] store [15:0];
@@ -102,10 +111,10 @@ always_comb begin
                         else nstore[addr][7:0] = hwdata[7:0];
 
                         if(addr == SAMPLE) wsample = 1'b1;
-                        if(addr == COEFFCONF) wcoeffs = 1'b1;
+                        if(addr == COCONF) wcoeffs = 1'b1;
                     end
-                    if(size) hrdata[addr] = store[addr];
-                    else hrdata[7:0] = nstore[addr][7:0];
+                    if(size) hrdata = store[addr];
+                    else hrdata[7:0] = store[addr][7:0];
                 end
             end
         endcase

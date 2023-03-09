@@ -1,13 +1,13 @@
-module(
+module ahb_lite_fir_filter (
     input logic clk,
     input logic n_rst,
     input logic hsel,
     input logic [3:0] haddr,
     input logic hsize,
-    input logic htrans[1:0],
+    input logic [1:0] htrans,
     input logic hwrite,
-    input logic hwdata[15:0],
-    output logic hrdata[15:0],
+    input logic [15:0] hwdata,
+    output logic [15:0] hrdata,
     output logic hresp
 );
 
@@ -23,7 +23,7 @@ wire data_ready; // Sample
 wire [15:0] sample_data;
 
 
-abh_lite_slave abh (
+ahb_lite_slave ahb (
     .clk(clk),
     .n_rst(n_rst),
     // Transactions
@@ -43,7 +43,7 @@ abh_lite_slave abh (
     .coefficient_num(coefficient_num),
     .fir_coefficient(fir_coefficient),
     .data_ready(data_ready), // Sample
-    .sample_data(sample_data),
+    .sample_data(sample_data)
 );
 
 coefficient_loader cldr (
@@ -57,15 +57,15 @@ coefficient_loader cldr (
 
 fir_filter fir (
     .clk(clk),
-    .n_rst(n_rst),
+    .n_reset(n_rst),
     .modwait(modwait), // Output
     .err(err),
     .fir_out(fir_out),
-    .new_coefficient_set(new_coefficient_set), // Coefficients
+    //.new_coefficient_set(new_coefficient_set), // Coefficients
     .load_coeff(load_coeff),
     .fir_coefficient(fir_coefficient),
     .data_ready(data_ready), // Sample
-    .sample_data(sample_data),
+    .sample_data(sample_data)
 );
 
 endmodule;

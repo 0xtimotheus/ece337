@@ -31,7 +31,7 @@ always_comb begin
     case(s)
         // Wait for new coefficient set
         IDLE: begin
-            ns = new_coefficient_set;
+            ns = new_coefficient_set ? LOAD : IDLE;
             ncoeff_num = 2'b0;
         end
         // Loading set
