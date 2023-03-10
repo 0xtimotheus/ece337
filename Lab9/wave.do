@@ -42,5 +42,5 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-run 1000ns
+run 2000ns
 WaveRestoreZoom {769963 ps} {910038 ps}

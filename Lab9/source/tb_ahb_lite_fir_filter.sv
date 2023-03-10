@@ -294,25 +294,72 @@ initial begin
     enqueue_transaction(1'b1, 1'b1, COCONF, 16'b1, 1'b0, 1'b0);
     execute_transactions(1);
 
+    #(8*CLK_PERIOD);
+    
+    // Cannot Write to a readonly register
+    enqueue_transaction(1'b1, 1'b1, RESULT, 16'd50, 1'b1, 1'b1);
+    execute_transactions(1);
+    check(1'b1, tb_hresp, "checking result- correctly throws err when trying to write");
+
     #(2*CLK_PERIOD);
 
-    // Load Sample
+    // Sample Processing Stream 1.1
     enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
     enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd100, 1'b0, 1'b1);
 
     execute_transactions(2);
-    check(16'd100, tb_hrdata, "loading sample- loaded correct value");
+    check(16'd100, tb_hrdata, "sample processing stream 1.1- loaded correct value");
 
     #(12*CLK_PERIOD);
 
     enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
     execute_transactions(1);
-    check(16'd50, tb_hrdata, "checking result- correctly calculated result");
+    check(16'd50, tb_hrdata, "sample processing stream 1.1- correctly calculated result");
 
     #(2*CLK_PERIOD);
-    enqueue_transaction(1'b1, 1'b1, RESULT, 16'd50, 1'b1, 1'b1);
+
+    // Sample Processing Stream 1.2
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd100, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd100, tb_hrdata, "sample processing stream 1.2- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
     execute_transactions(1);
-    check(1'b1, tb_hresp, "checking result- correctly throws err when trying to write");
+    check(16'd50, tb_hrdata, "sample processing stream 1.2- correctly calculated result");
+
+    #(2*CLK_PERIOD);
+
+    // Sample Processing Stream 1.3
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd100, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd100, tb_hrdata, "sample processing stream 1.3- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(16'd50, tb_hrdata, "sample processing stream 1.3- correctly calculated result");
+
+    #(2*CLK_PERIOD);
+
+    // Sample Processing Stream 1.4
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd100, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd100, tb_hrdata, "sample processing stream 1.4- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(16'd0, tb_hrdata, "sample processing stream 1.4- correctly calculated result");
 
     #(2*CLK_PERIOD);
 
