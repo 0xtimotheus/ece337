@@ -1,5 +1,6 @@
 onerror {resume}
 quietly WaveActivateNextPane {} 0
+add wave -noupdate -expand -group {System Signals} -color Gray60 /tb_ahb_lite_fir_filter/current_test
 add wave -noupdate -expand -group {System Signals} -color Gray60 /tb_ahb_lite_fir_filter/DUT/ahb/clk
 add wave -noupdate -expand -group {System Signals} -color Black /tb_ahb_lite_fir_filter/DUT/ahb/n_rst
 add wave -noupdate -expand -group {Transaction Controls} -color {Yellow Green} /tb_ahb_lite_fir_filter/DUT/ahb/hsel
@@ -14,12 +15,12 @@ add wave -noupdate -expand -group {Transaction Controls} -color {Olive Drab} /tb
 add wave -noupdate -expand -group Outputs -color Thistle /tb_ahb_lite_fir_filter/DUT/hrdata
 add wave -noupdate -expand -group Outputs -color {Medium Violet Red} /tb_ahb_lite_fir_filter/DUT/hresp
 add wave -noupdate -group Store -color Gold -childformat {{{/tb_ahb_lite_fir_filter/DUT/ahb/store[2]} -radix decimal}} -expand -subitemconfig {{/tb_ahb_lite_fir_filter/DUT/ahb/store[15]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[14]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[13]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[12]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[11]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[10]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[9]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[8]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[7]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[6]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[5]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[4]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[3]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[2]} {-color Gold -height 16 -radix decimal} {/tb_ahb_lite_fir_filter/DUT/ahb/store[1]} {-color Gold -height 16} {/tb_ahb_lite_fir_filter/DUT/ahb/store[0]} {-color Gold -height 16}} /tb_ahb_lite_fir_filter/DUT/ahb/store
-add wave -noupdate -group {Filter Controls} -color {Yellow Green} /tb_ahb_lite_fir_filter/DUT/ahb/modwait
-add wave -noupdate -group {Filter Controls} -color {Yellow Green} /tb_ahb_lite_fir_filter/DUT/ahb/err
-add wave -noupdate -group {Filter Controls} -color {Dark Olive Green} /tb_ahb_lite_fir_filter/DUT/ahb/wsample
-add wave -noupdate -group {Filter Controls} -color {Olive Drab} /tb_ahb_lite_fir_filter/DUT/ahb/data_ready
-add wave -noupdate -group {Filter Controls} -color {Dark Olive Green} /tb_ahb_lite_fir_filter/DUT/ahb/wcoeffs
-add wave -noupdate -group {Filter Controls} -color {Olive Drab} /tb_ahb_lite_fir_filter/DUT/ahb/new_coefficient_set
+add wave -noupdate -expand -group {Filter Controls} -color {Yellow Green} /tb_ahb_lite_fir_filter/DUT/ahb/modwait
+add wave -noupdate -expand -group {Filter Controls} -color {Yellow Green} /tb_ahb_lite_fir_filter/DUT/ahb/err
+add wave -noupdate -expand -group {Filter Controls} -color {Dark Olive Green} /tb_ahb_lite_fir_filter/DUT/ahb/wsample
+add wave -noupdate -expand -group {Filter Controls} -color {Olive Drab} /tb_ahb_lite_fir_filter/DUT/ahb/data_ready
+add wave -noupdate -expand -group {Filter Controls} -color {Dark Olive Green} /tb_ahb_lite_fir_filter/DUT/ahb/wcoeffs
+add wave -noupdate -expand -group {Filter Controls} -color {Olive Drab} /tb_ahb_lite_fir_filter/DUT/ahb/new_coefficient_set
 add wave -noupdate -expand -group {Filter Signals} -color {Dark Orchid} /tb_ahb_lite_fir_filter/DUT/ahb/sample_data
 add wave -noupdate -expand -group {Filter Signals} -color {Slate Blue} /tb_ahb_lite_fir_filter/DUT/ahb/coefficient_num
 add wave -noupdate -expand -group {Filter Signals} -color {Blue Violet} /tb_ahb_lite_fir_filter/DUT/ahb/fir_coefficient
@@ -42,5 +43,5 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ps
 update
-run 2000ns
-WaveRestoreZoom {769963 ps} {910038 ps}
+run 10000ns
+WaveRestoreZoom {2519 ps} {315953 ps}

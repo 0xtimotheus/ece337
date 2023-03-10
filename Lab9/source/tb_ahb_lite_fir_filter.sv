@@ -21,6 +21,7 @@ localparam COEFF0  		= 16'h0000; // 0.0
 
 // Testing Controls
 integer tests_failed;
+string  current_test;
 
 // System Signals
 logic tb_clk;
@@ -185,10 +186,10 @@ begin
   end
 
   // Run out the last one (currently in data phase)
-  @(posedge tb_clk);
+  //@(posedge tb_clk);
 
   // Turn off the bus model
-  //@(negedge tb_clk);
+  @(negedge tb_clk);
   tb_enable_transactions = 1'b0;
 end
 endtask
@@ -209,6 +210,8 @@ endtask
 
 initial begin
     tests_failed = 0;
+    current_test = "";
+
     tb_n_rst = 1'b1;
     tb_hsel = 1'b0;
     tb_haddr = 4'b0;
@@ -219,12 +222,14 @@ initial begin
 
     #(0.25);
 
+    // Power on Reset
+    current_test = "Power on Reset";
+
     reset_model();
     reset_dut();
 
     #CLK_PERIOD;
 
-    // Power on Reset
     enqueue_transaction(1'b1, 1'b0, STATUS, 16'b0, 1'b0, 1'b1);
     enqueue_transaction(1'b1, 1'b0, RESULT, 16'b0, 1'b0, 1'b1);
     enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'b0, 1'b0, 1'b1);
@@ -258,7 +263,9 @@ initial begin
     execute_transactions(1);
     check(16'h0, tb_hrdata, "power on reset- coefficient confirmation");
 
-    #(2*CLK_PERIOD);
+    #CLK_PERIOD;
+    current_test = "Load Coefficients for Stream 1";
+    #CLK_PERIOD;
 
     // Load Coefficients
     enqueue_transaction(1'b1, 1'b1, F0COEF, COEFF_5, 1'b0, 1'b1);
@@ -271,37 +278,45 @@ initial begin
     #(2*CLK_PERIOD);
     enqueue_transaction(1'b1, 1'b0, F0COEF, COEFF_5, 1'b0, 1'b1);
     execute_transactions(1);
-    check(COEFF_5, tb_hrdata, "loading coefficients- loaded correct f0 coefficients");
+    check(COEFF_5, tb_hrdata, "loading coefficients 1.0- loaded correct f0 coefficients");
 
     #(2*CLK_PERIOD);
     enqueue_transaction(1'b1, 1'b0, F1COEF, COEFF1, 1'b0, 1'b1);
     execute_transactions(1);
-    check(COEFF1, tb_hrdata, "loading coefficients- loaded correct f1 coefficients");
+    check(COEFF1, tb_hrdata, "loading coefficients 1.1- loaded correct f1 coefficients");
 
     #(2*CLK_PERIOD);
     enqueue_transaction(1'b1, 1'b0, F2COEF, COEFF1, 1'b0, 1'b1);
     execute_transactions(1);
-    check(COEFF1, tb_hrdata, "loading coefficients- loaded correct f2 coefficients");
+    check(COEFF1, tb_hrdata, "loading coefficients 1.2- loaded correct f2 coefficients");
 
     #(2*CLK_PERIOD);
     enqueue_transaction(1'b1, 1'b0, F3COEF, COEFF_5, 1'b0, 1'b1);
     execute_transactions(1);
-    check(COEFF_5, tb_hrdata, "loading coefficients- loaded correct f3 coefficients");
+    check(COEFF_5, tb_hrdata, "loading coefficients 1.3- loaded correct f3 coefficients");
 
-    #(2*CLK_PERIOD);
+    #CLK_PERIOD;
+    current_test = "Confirm Coefficients for Stream 1";
+    #CLK_PERIOD;
 
     // Confirm Coefficients
     enqueue_transaction(1'b1, 1'b1, COCONF, 16'b1, 1'b0, 1'b0);
     execute_transactions(1);
 
-    #(8*CLK_PERIOD);
+    #(12*CLK_PERIOD);
+
+    #CLK_PERIOD;
+    current_test = "Error when writing to readonly";
+    #CLK_PERIOD;
     
     // Cannot Write to a readonly register
     enqueue_transaction(1'b1, 1'b1, RESULT, 16'd50, 1'b1, 1'b1);
     execute_transactions(1);
     check(1'b1, tb_hresp, "checking result- correctly throws err when trying to write");
 
-    #(2*CLK_PERIOD);
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 1.1";
+    #CLK_PERIOD;
 
     // Sample Processing Stream 1.1
     enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
@@ -316,7 +331,9 @@ initial begin
     execute_transactions(1);
     check(16'd50, tb_hrdata, "sample processing stream 1.1- correctly calculated result");
 
-    #(2*CLK_PERIOD);
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 1.2";
+    #CLK_PERIOD;
 
     // Sample Processing Stream 1.2
     enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
@@ -331,7 +348,9 @@ initial begin
     execute_transactions(1);
     check(16'd50, tb_hrdata, "sample processing stream 1.2- correctly calculated result");
 
-    #(2*CLK_PERIOD);
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 1.3";
+    #CLK_PERIOD;
 
     // Sample Processing Stream 1.3
     enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
@@ -346,7 +365,9 @@ initial begin
     execute_transactions(1);
     check(16'd50, tb_hrdata, "sample processing stream 1.3- correctly calculated result");
 
-    #(2*CLK_PERIOD);
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 1.4";
+    #CLK_PERIOD;
 
     // Sample Processing Stream 1.4
     enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
@@ -357,9 +378,121 @@ initial begin
 
     #(12*CLK_PERIOD);
 
-    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd0, 1'b0, 1'b1);
     execute_transactions(1);
     check(16'd0, tb_hrdata, "sample processing stream 1.4- correctly calculated result");
+
+    reset_dut();
+
+    #CLK_PERIOD;
+    current_test = "Load Coefficients for Stream 2";
+    #CLK_PERIOD;
+
+    // Load Coefficients for Stream 2
+    enqueue_transaction(1'b1, 1'b1, F0COEF, COEFF_5, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, F1COEF, COEFF1, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, F2COEF, COEFF1, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, F3COEF, COEFF_5, 1'b0, 1'b1);
+
+    execute_transactions(4);
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F0COEF, COEFF_5, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF_5, tb_hrdata, "loading coefficients 2.0- loaded correct f0 coefficients");
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F1COEF, COEFF1, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF1, tb_hrdata, "loading coefficients 2.1- loaded correct f1 coefficients");
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F2COEF, COEFF1, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF1, tb_hrdata, "loading coefficients 2.2- loaded correct f2 coefficients");
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F3COEF, COEFF_5, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF_5, tb_hrdata, "loading coefficients 2.3- loaded correct f3 coefficients");
+
+    #CLK_PERIOD;
+    current_test = "Confirm Coefficients for Stream 2";
+    #CLK_PERIOD;
+
+    // Confirm Coefficients
+    enqueue_transaction(1'b1, 1'b1, COCONF, 16'b1, 1'b0, 1'b0);
+    execute_transactions(1);
+
+    #(12*CLK_PERIOD);
+
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 2.1";
+    #CLK_PERIOD;
+
+    // Sample Processing Stream 2.1
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd100, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd100, tb_hrdata, "sample processing stream 2.1- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(16'd50, tb_hrdata, "sample processing stream 2.1- correctly calculated result");
+
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 2.2";
+    #CLK_PERIOD;
+
+    // Sample Processing Stream 2.2
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd100, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd100, tb_hrdata, "sample processing stream 2.2- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(16'd50, tb_hrdata, "sample processing stream 2.2- correctly calculated result");
+
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 2.3";
+    #CLK_PERIOD;
+
+    // Sample Processing Stream 2.3
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd1000, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd1000, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd1000, tb_hrdata, "sample processing stream 2.3- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd500, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(16'd500, tb_hrdata, "sample processing stream 2.3- correctly calculated result");
+
+    #CLK_PERIOD;
+    current_test = "Sample Processing Stream 2.4";
+    #CLK_PERIOD;
+
+    // Sample Processing Stream 2.4
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd1000, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd1000, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd1000, tb_hrdata, "sample processing stream 2.4- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd450, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(16'd450, tb_hrdata, "sample processing stream 2.4- correctly calculated result");
 
     #(2*CLK_PERIOD);
 
