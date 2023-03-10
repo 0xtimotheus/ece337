@@ -290,7 +290,8 @@ begin
 
   // Turn off the bus model
   @(negedge tb_clk);
-  tb_enable_transactions = 1'b0;
+  tb_enable_transactions = 1'b0;sim:/tb_ahb_lite_fir_filter/DUT/ahb/addr
+
 end
 endtask
 

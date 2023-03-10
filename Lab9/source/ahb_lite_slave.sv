@@ -89,10 +89,11 @@ always_comb begin
     nstore[RESULT] = fir_out; // Result
     sample_data = store[SAMPLE];
     fir_coefficient = store[F0COEF + (coefficient_num << 1)]; // Active Fir Coefficient
+    nstore[COCONF] = coefficient_num == 2'b11 ? 1'b0 : nstore[COCONF];
 
     //Signals
     hresp = 1'b0;
-    wsample = 1'b0;
+    wsample = data_ready ? ~modwait : data_ready;
     wcoeffs = 1'b0;
 
     // Transactions

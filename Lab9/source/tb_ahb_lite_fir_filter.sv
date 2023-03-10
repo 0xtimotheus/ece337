@@ -13,6 +13,12 @@ localparam DATA_WIDTH_BITS = DATA_WIDTH * 8;
 localparam DATA_MAX_BIT    = DATA_WIDTH_BITS - 1;
 localparam ADDR_MAX_BIT    = ADDR_WIDTH - 1;
 
+localparam COEFF1 		= 16'h8000; // 1.0
+localparam COEFF_5 		= 16'h4000; // 0.5
+localparam COEFF_25 	= 16'h2000; // 0.25
+localparam COEFF_125 	= 16'h1000; // 0.125
+localparam COEFF0  		= 16'h0000; // 0.0
+
 // Testing Controls
 integer tests_failed;
 
@@ -182,22 +188,27 @@ begin
   @(posedge tb_clk);
 
   // Turn off the bus model
-  @(negedge tb_clk);
+  //@(negedge tb_clk);
   tb_enable_transactions = 1'b0;
 end
 endtask
 
 task check;
-    input actual;
-    input expected;
+    input integer expected;
+    input integer actual;
     input string message;
 begin
-    if(actual == expected) $info("Passed-- %s; expected %d got %d", message, expected, actual);
-    else $error("FAILED-- %s; expected %d got %d", message, expected, actual);
+    if(actual == expected) begin
+        $info("Passed-- %s; expected %d got %d", message, expected, actual);
+    end else begin
+        $error("FAILED-- %s; expected %d got %d", message, expected, actual);
+        tests_failed = tests_failed + 1;
+    end
 end
 endtask
 
 initial begin
+    tests_failed = 0;
     tb_n_rst = 1'b1;
     tb_hsel = 1'b0;
     tb_haddr = 4'b0;
@@ -248,6 +259,65 @@ initial begin
     check(16'h0, tb_hrdata, "power on reset- coefficient confirmation");
 
     #(2*CLK_PERIOD);
+
+    // Load Coefficients
+    enqueue_transaction(1'b1, 1'b1, F0COEF, COEFF_5, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, F1COEF, COEFF1, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, F2COEF, COEFF1, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b1, F3COEF, COEFF_5, 1'b0, 1'b1);
+
+    execute_transactions(4);
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F0COEF, COEFF_5, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF_5, tb_hrdata, "loading coefficients- loaded correct f0 coefficients");
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F1COEF, COEFF1, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF1, tb_hrdata, "loading coefficients- loaded correct f1 coefficients");
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F2COEF, COEFF1, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF1, tb_hrdata, "loading coefficients- loaded correct f2 coefficients");
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b0, F3COEF, COEFF_5, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(COEFF_5, tb_hrdata, "loading coefficients- loaded correct f3 coefficients");
+
+    #(2*CLK_PERIOD);
+
+    // Confirm Coefficients
+    enqueue_transaction(1'b1, 1'b1, COCONF, 16'b1, 1'b0, 1'b0);
+    execute_transactions(1);
+
+    #(2*CLK_PERIOD);
+
+    // Load Sample
+    enqueue_transaction(1'b1, 1'b1, SAMPLE, 16'd100, 1'b0, 1'b1);
+    enqueue_transaction(1'b1, 1'b0, SAMPLE, 16'd100, 1'b0, 1'b1);
+
+    execute_transactions(2);
+    check(16'd100, tb_hrdata, "loading sample- loaded correct value");
+
+    #(12*CLK_PERIOD);
+
+    enqueue_transaction(1'b1, 1'b0, RESULT, 16'd50, 1'b0, 1'b1);
+    execute_transactions(1);
+    check(16'd50, tb_hrdata, "checking result- correctly calculated result");
+
+    #(2*CLK_PERIOD);
+    enqueue_transaction(1'b1, 1'b1, RESULT, 16'd50, 1'b1, 1'b1);
+    execute_transactions(1);
+    check(1'b1, tb_hresp, "checking result- correctly throws err when trying to write");
+
+    #(2*CLK_PERIOD);
+
+    if(tests_failed == 0) $info("All Tests Passed :)");
+    else $info("Failed %d tests :(", tests_failed);
 
 end
 

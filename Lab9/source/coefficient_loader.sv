@@ -37,14 +37,15 @@ always_comb begin
         // Loading set
         LOAD: begin
             // If busy do nothing
-            if(~modwait) begin
+            load_coeff = 1;
+            if(modwait) begin
                 // If loaded all coefficients => go back to IDLE
                 if(coefficient_num == 2'b11) begin
                     ns = IDLE;
                     ncoeff_num = 2'b0;
                 end else begin
                     // Otherwise set load signal high and increment the coeff number
-                    load_coeff = 1;
+                    load_coeff = 0;
                     ncoeff_num = coefficient_num + 1;
                 end
             end
